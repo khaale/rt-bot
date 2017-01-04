@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+    consul:
+        image:  gliderlabs/consul-server:latest
+        command: "-server -bootstrap"
+        container_name: consul_standalone
+        hostname: consul
+        ports:
+            - 8500:8500
+
+    registrator:
+        image: gliderlabs/registrator:latest
+        command: "-internal consul://consul:8500"
+        container_name: registrator_standalone
+        hostname: registrator
+        depends_on:
+            - consul
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+
+    consul-template:
+        build: .
+        container_name: consul-template_standalone
+        hostname: consul-template
+        restart: always
+
+        command: >
+            -consul consul:8500
+            -template "/etc/consul-template/nginx/nginx.conf.ctmpl:/etc/nginx/nginx.conf:echo 'Reload NGINX should be called there'"
+
+        volumes:
+            - ./templates:/etc/consul-template
+            - ./../etc:/etc/nginx
+        
+        depends_on: 
+            - consul
