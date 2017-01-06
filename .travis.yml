@@ -56,5 +56,8 @@ script:
         echo "$deploy_result" | grep -q '"status": "ok"'
       fi
       
+after_failure:
+  - docker-compose logs -t && sleep 20;
+
 after_script:
   - docker-compose down

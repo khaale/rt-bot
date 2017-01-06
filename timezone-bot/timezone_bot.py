@@ -26,12 +26,16 @@ def event():
         message = json.loads(request.data).get('text', None)
 
         if not message:
+            print("Expectation failed - the message is empty")
             return ExpectationFailed()
 
         # Check if message matches with pattern
         result = re.findall(r'время (в|во) (.*)', message)
 
         if not result:
+            print('Expectation failed - the message "{message}" does not match pattern'.format(
+                message=message
+            ))
             return ExpectationFailed()
 
         city = result[0][1]
@@ -75,7 +79,8 @@ def event():
                    }
 
     # JSONDecodeError or have no connection with Google API services
-    except Exception:
+    except Exception as e:
+        print(str(e))
         return ExpectationFailed()
 
 
