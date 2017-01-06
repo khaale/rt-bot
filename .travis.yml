@@ -41,13 +41,11 @@ script:
   - echo "Waiting $BOTS_WAIT_TIMEOUT seconds to ensure if all bots are ready..."; sleep "$BOTS_WAIT_TIMEOUT"
   - DOCKER_REGISTRY_LOGIN= DOCKER_REGISTRY_PASSWORD= DEPLOY_USER= DEPLOY_PASSWD= BOT_BASE_URL="https://localhost" python ci/run_bot_tests.py .
 
-  - |
-      if [ "$?" -ne "0" ]; then
-        echo "Tests were failed, printing docker-compose logs.."
-        docker-compose logs -t
-        exit 1
-      fi
+after_failure:
+  - docker-compose logs -t
 
+deploy:
+  - set -e
   - |
       if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
         docker login \
