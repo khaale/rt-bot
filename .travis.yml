@@ -42,6 +42,13 @@ script:
   - DOCKER_REGISTRY_LOGIN= DOCKER_REGISTRY_PASSWORD= DEPLOY_USER= DEPLOY_PASSWD= BOT_BASE_URL="https://localhost" python ci/run_bot_tests.py .
 
   - |
+      if [ "$?" -ne "0" ]; then
+        echo "Tests were failed, printing docker-compose logs.."
+        docker-compose logs -t
+        exit 1
+      fi
+
+  - |
       if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
         docker login \
           --username "$DOCKER_REGISTRY_LOGIN" \
