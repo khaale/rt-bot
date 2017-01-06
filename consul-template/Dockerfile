@@ -12,7 +12,4 @@ RUN cd /tmp && \
     mv consul-template /bin/consul-template && \
     rm -rf /tmp
 
-ADD reload-nginx.sh /
-RUN chmod +x /reload-nginx.sh
-
 ENTRYPOINT ["/bin/consul-template"]

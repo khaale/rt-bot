@@ -1,6 +1,43 @@
 version: '2'
 
 services:
+
+    consul:
+        image:  gliderlabs/consul-server:latest
+        command: "-server -bootstrap"
+        container_name: consul
+        hostname: consul
+        ports:
+            - 8500:8500
+
+    registrator:
+        image: gliderlabs/registrator:latest
+        command: "-internal consul://consul:8500"
+        container_name: registrator
+        hostname: registrator
+        depends_on:
+            - consul
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+
+    consul-template:
+        build: consul-template
+        container_name: consul-template
+        hostname: consul-template
+        restart: always
+
+        command: >
+            -consul consul:8500
+            -template "/etc/consul-template/nginx/nginx.conf.ctmpl:/etc/nginx/nginx.conf:echo 'Reload NGINX should be called there'"
+
+        volumes:
+            - ./consul-template/templates:/etc/consul-template
+            - ./etc:/etc/nginx
+            - /var/run/docker.sock:/tmp/docker.sock
+        
+        depends_on: 
+            - consul
+
     nginx:
         image: umputun/nginx-le:latest
         container_name: nginx-bot
@@ -30,33 +67,9 @@ services:
             - LE_FQDN=bot.radio-t.com
 
         depends_on:
+            - consul-template
             - memberberries
             - hello
-            - wiki-bot
-            - search-bot
-            - noter-bot
-            - repl-bot
-            - 5minphp-bot
-            - karma-bot
-            - loro-bot
-            - guido-bot
-            - giphy-bot
-            - gif-bot
-            - stat-bot
-            - anek-bot
-            - grabpage-bot
-            - ksenks-bot
-            - rtnumber-bot
-            - excerpt-bot
-            - tweet-bot
-            - rest-voter
-            - hcalendar-bot
-            - timezone-bot
-            - doit-bot
-            - docker-bot
-            - money_bot
-            - random-bot
-            - bot-4-bots
 
     hello:
         build: hello
@@ -65,6 +78,8 @@ services:
         hostname: hello-bot
         restart: always
         logging: *default_logging
+        labels: 
+            - SERVICE_TAGS=bot
 
     memberberries:
         build: memberberries
@@ -73,234 +88,5 @@ services:
         hostname: memberberries-bot
         restart: always
         logging: *default_logging
-
-    wiki-bot:
-        build: wiki-bot
-        image: rtbot/wiki-bot
-        container_name: wiki-bot
-        hostname: wiki-bot
-        restart: always
-        logging: *default_logging
-
-    search-bot:
-        build: search-bot
-        image: rtbot/search-bot
-        container_name: search-bot
-        hostname: search-bot
-        restart: always
-        logging: *default_logging
-
-    noter-bot:
-        build: noter-bot
-        image: rtbot/boter-bot
-        container_name: noter-bot
-        hostname: noter-bot
-        restart: always
-        logging: *default_logging
-
-    repl-bot:
-        build: rt-repl-bot
-        image: rtbot/repl-bot
-        container_name: repl-bot
-        hostname: repl-bot
-        restart: always
-        logging: *default_logging
-
-    stat-bot:
-        build: stat-bot
-        image: rtbot/stat-bot
-        container_name: stat-bot
-        hostname: stat-bot
-        restart: always
-        logging: *default_logging
-
-    gif-bot:
-        build: gif-bot
-        image: rtbot/gif-bot
-        container_name: gif-bot
-        hostname: gif-bot
-        restart: always
-        logging: *default_logging
-
-    giphy-bot:
-        build: giphy-bot
-        image: rtbot/giphy-bot
-        container_name: giphy-bot
-        hostname: giphy-bot
-        restart: always
-        logging: *default_logging
-
-    5minphp-bot:
-        build: 5minphp-bot
-        image: rtbot/5minphp-bot
-        container_name: 5minphp-bot
-        hostname: 5minphp-bot
-        restart: always
-        logging: *default_logging
-
-    loro-bot:
-        build: loro-bot
-        image: rtbot/loro-bot
-        container_name: loro-bot
-        hostname: loro-bot
-        restart: always
-        logging: *default_logging
-
-    brackets-bot:
-        build: brackets-bot
-        image: rtbot/brackets-bot
-        container_name: brackets-bot
-        hostname: brackets-bot
-        restart: always
-        logging: *default_logging
-
-    guido-bot:
-        build: guido-bot
-        image: rtbot/guido-bot
-        container_name: guido-bot
-        hostname: guido-bot
-        restart: always
-        logging: *default_logging
-
-    karma-bot-storage:
-      image: redis:3-alpine
-      container_name: karma-bot-storage
-      hostname: karma-bot-storage
-      restart: always
-      logging:
-        driver: json-file
-        options:
-          max-size: "10m"
-          max-file: "5"
-
-    karma-bot:
-        build: karma-bot
-        image: rtbot/karma-bot
-        container_name: karma-bot
-        hostname: karma-bot
-        restart: always
-        environment:
-          - REDIS_HOST=karma-bot-storage
-        depends_on:
-          - karma-bot-storage
-        logging: *default_logging
-
-    sovet-bot:
-        build: sovet-bot
-        image: rtbot/sovet-bot
-        container_name: sovet-bot
-        hostname: sovet-bot
-        restart: always
-        logging: *default_logging
-
-    hcalendar-bot:
-        build: hcalendar-bot
-        image: rtbot/hcalendar-bot
-        container_name: hcalendar-bot
-        hostname: hcalendar-bot
-        restart: always
-        logging: *default_logging
-
-    anek-bot:
-        build: anek-bot
-        image: rtbot/anek-bot
-        container_name: anek-bot
-        hostname: anek-bot
-        restart: always
-        logging: *default_logging
-
-    grabpage-bot:
-        build: grabpage-bot
-        image: rtbot/grabpage-bot
-        container_name: grabpage-bot
-        hostname: grabpage-bot
-        restart: always
-        logging: *default_logging
-
-    ksenks-bot:
-        build: ksenks-bot
-        image: rtbot/ksenks-bot
-        container_name: ksenks-bot
-        hostname: ksenks-bot
-        restart: always
-        logging: *default_logging
-
-    rtnumber-bot:
-        build: rtnumber-bot
-        image: rtbot/rtnumber-bot
-        container_name: rtnumber-bot
-        hostname: rtnumber-bot
-        restart: always
-        logging: *default_logging
-
-    excerpt-bot:
-        build: excerpt-bot
-        image: rtbot/excerpt-bot
-        container_name: excerpt-bot
-        hostname: excerpt-bot
-        restart: always
-        logging: *default_logging
-
-    tweet-bot:
-        build: tweet-bot
-        image: rtbot/tweet-bot
-        container_name: tweet-bot
-        hostname: tweet-bot
-        restart: always
-        logging: *default_logging
-
-    rest-voter:
-        build: rest-voter
-        image: rtbot/rest-voter
-        container_name: rest-voter
-        hostname: rest-voter
-        restart: always
-        logging: *default_logging
-
-    timezone-bot:
-        build: timezone-bot
-        image: rtbot/timezone-bot
-        container_name: timezone-bot
-        hostname: timezone-bot
-        restart: always
-        logging: *default_logging
-
-    doit-bot:
-        build: doit-bot
-        image: rtbot/doit-bot
-        container_name: doit-bot
-        hostname: doit-bot
-        restart: always
-        logging: *default_logging
-
-    money_bot:
-        build: money_bot
-        image: rtbot/money_bot
-        container_name: money_bot
-        hostname: money_bot
-        restart: always
-        logging: *default_logging
-
-    docker-bot:
-        build: docker-bot
-        image: rtbot/docker-bot
-        container_name: docker-bot
-        hostname: docker-bot
-        restart: always
-        logging: *default_logging
-
-    random-bot:
-        build: random-bot
-        image: rtbot/random-bot
-        container_name: random-bot
-        hostname: random-bot
-        restart: always
-        logging: *default_logging
-
-    bot-4-bots:
-        build: bot-4-bots
-        image: rtbot/bot-4-bots
-        container_name: bot-4-bots
-        hostname: bot-4-bots
-        restart: always
-        logging: *default_logging
+        labels: 
+            - SERVICE_TAGS=bot
