@@ -1,2 +1,3 @@
 #!/bin/bash
-echo "Reloading NGINX - TBD"
+echo "Restarting NGINX container"
+docker restart $NGINX_CONTAINER
