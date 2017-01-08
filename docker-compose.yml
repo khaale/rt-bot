@@ -33,7 +33,7 @@ services:
         volumes:
             - ./consul-template/templates:/etc/consul-template
             - ./etc:/etc/nginx
-            - /var/run/docker.sock
+            - /var/run/docker.sock:/tmp/docker.sock
         
         environment: 
             - NGINX_CONTAINER=nginx-bot
@@ -55,7 +55,7 @@ services:
 
         volumes:
             - ./etc/ssl:/etc/nginx/ssl
-            - ./etc/nginx.conf:/etc/nginx/service.conf
+            - ./etc/conf:/etc/nginx/
 
         ports:
             - "80:80"

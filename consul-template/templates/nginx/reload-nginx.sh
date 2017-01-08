@@ -1,3 +1,6 @@
 #!/bin/bash
 echo "Restarting NGINX container"
-docker restart $NGINX_CONTAINER
+
+if [[(docker ps -f name=nginx-bot | grep -c nginx-bot) -eq "1"]]; then
+    docker restart $NGINX_CONTAINER
+fi

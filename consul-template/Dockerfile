@@ -1,6 +1,6 @@
 FROM gliderlabs/alpine
 
-ENV DOCKER_HOST unix:///var/run/docker.sock
+ENV DOCKER_HOST unix:///tmp/docker.sock
 RUN apk add --update docker && docker -v
 
 ENV CONSUL_TEMPLATE_VERSION 0.16.0
